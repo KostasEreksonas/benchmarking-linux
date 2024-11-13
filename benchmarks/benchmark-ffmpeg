@@ -704,6 +704,9 @@ benchmark() {
 
 	# Main loop
 	for (( i=0; i<"${iterations}"; i++ )); do
+		# Get temp file
+		tmp_file="/tmp/bench_file"
+
 		# Print iteration
 		printf "%s\n" "${delimiter}"
 		printf "| [+] Iteration %s\n" "$((i+1))"
@@ -718,7 +721,7 @@ benchmark() {
 		fi
 
 		# Get encoding data of current iteration
-		data=$(sed 's/\r/\n/g' /tmp/bench_file | tail -1)
+		data=$(sed 's/\r/\n/g' "${tmp_file}" | tail -1)
 
 		# Parse data based on encoder (frames, fps and time)
 		if [[ "${encoder}" != "libx265" ]]; then
@@ -753,7 +756,7 @@ benchmark() {
 		average_fps="$(printf "%.3f" "${average_fps}")"
 
 		# Remove temporary file
-		rm "/tmp/bench_file"
+		rm "${tmp_file}"
 
 		# Print time
 		printf "| [+] Iteration %s time: %s, fps: %s\n" "$((i + 1))" "$(formatTime "${time}")" "${fps}"
