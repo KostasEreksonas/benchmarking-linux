@@ -2,136 +2,23 @@
 
 # Benchmark blender performance
 
-# Delimiter
+#  -----------
+# | Delimiter |
+#  -----------
 delimiter="------------------------------------------------------------------------------------------------------------"
+
+#  ---------
+# | Sources |
+#  ---------
+source getInfo.sh
+source defaultDir.sh
+source backupResults.sh
+source showProgress.sh
 
 checkDependencies() {
 	# Check if dependencies are installed
 	if ! which blender 2>/dev/null 1>&2; then missing+=("blender"); fi
 	if ! which 7z 2>/dev/null 1>&2; then missing+=("7z"); fi
-}
-
-createDirectories() {
-	# Create needed directories
-	local benchmark_dir="${1}"
-	local results_file="${2}"
-
-	printf "%s\n" "${delimiter}"
-	printf "| [+] Creating files\n"
-	printf "%s\n" "${delimiter}"
-
-	# Create directory for blender benchmark
-	if ! [[ -d "${benchmark_dir}/data/" ]]; then
-		printf "%s\n" "${delimiter}"
-		printf "| [+] Creating %s/data/\n" "${benchmark_dir}"
-		mkdir -p "${benchmark_dir}/data/"
-	else
-		printf "%s\n" "${delimiter}"
-		printf "| [+] Directory %s/data/ already created\n" "${benchmark_dir}"
-	fi
-
-	# Create results file for blender benchmark
-	if ! [[ -f "${results_file}" ]]; then
-		printf "| [+] Creating %s\n" "${results_file}"
-		printf "%s\n" "${delimiter}"
-		touch "${results_file}"
-	else
-		printf "| [+] File %s already created\n" "${results_file}"
-		printf "%s\n" "${delimiter}"
-	fi
-}
-
-formatTime() {
-    # Format time to <xx>h <xx>m <xx.xxx>s
-    time="${1}"
-
-	# Get seconds value
-    seconds="${time%%.*}"
-    if [[ -z "${seconds}" ]]; then seconds=0; fi
-    miliseconds="${time##*.}"
-    if [[ -z "${miliseconds}" ]]; then miliseconds=0; fi
-	if [[ "${seconds}" -lt 60 ]]; then
-        printf "%s.%s seconds\n" "${seconds}" "${miliseconds}"
-    elif [[ "${seconds}" -ge 60 && "${seconds}" -lt 3600 ]]; then
-        minutes="$(echo "${seconds}/60" | bc -l | cut -d "." -f 1)"
-        if [[ -z "${minutes}" ]]; then minutes=0; fi
-		seconds="$((${seconds}-60*${minutes}))"
-        if [[ -z "${seconds}" ]]; then seconds=0; fi
-		if [[ "${minutes}" == 1 ]]; then
-			printf "%s minute %s.%s seconds\n" "${minutes}" "${seconds}" "${miliseconds}"
-		else
-			printf "%s minutes %s.%s seconds\n" "${minutes}" "${seconds}" "${miliseconds}"
-		fi
-	elif [[ "${seconds}" -ge 3600 ]]; then
-        hours="$(echo "${seconds}/3600" | bc -l | cut -d "." -f 1)"
-        if [[ -z "${hours}" ]]; then hours=0; fi
-        seconds="$((${seconds}-3600*${hours}))"
-        minutes="$(echo "${seconds}/60" | bc -l | cut -d "." -f 1)"
-        if [[ -z "${minutes}" ]]; then minutes=0; fi
-        seconds="$((${seconds}-60*${minutes}))"
-        if [[ -z "${seconds}" ]]; then seconds=0; fi
-		if [[ "${hours}" == 1 ]] && [[ "${minutes}" == 1 ]]; then
-			printf "%s hour %s minute %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
-		elif [[ "${hours}" == 1 ]] && [[ "${minutes}" -gt 1 ]]; then
-			printf "%s hour %s minutes %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
-		elif [[ "${hours}" -gt 1 ]] && [[ "${minutes}" == 1 ]]; then
-			printf "%s hours %s minute %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
-		else
-			printf "%s hours %s minutes %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
-		fi
-	fi
-}
-
-getInfo() {
-    # Get system info
-	arch="$(uname -m)"
-    os="$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
-	os="$(echo "${os}" | sed 's/\"//g')"
-	cpu="$(lscpu | grep "Model name" | cut -d ":" -f 2 | xargs)"
-    cores="$(grep "cpu cores" /proc/cpuinfo | head -1 | cut -d ":" -f 2 | tr -d " ")"
-    threads="$(grep -c processor /proc/cpuinfo)"
-    min_freq="$(echo "$(lscpu | grep "CPU min" | cut -d ":" -f 2 | cut -d "." -f 1 | tr -d " ")/1000" | bc -l 2>/dev/null)"
-    max_freq="$(echo "$(lscpu | grep "CPU max" | cut -d ":" -f 2 | cut -d "." -f 1 | tr -d " ")/1000" | bc -l 2>/dev/null)"
-    memory="$(echo "$(grep MemTotal /proc/meminfo | cut -d ":" -f 2 | tr -d " kB")/1024/1024" | bc -l 2>/dev/null)"
-    uptime="$(formatTime "$(cut -d " " -f 1 < /proc/uptime)")"
-    gpu=$(lspci | grep -E 'VGA|3D')
-	gpu="${gpu//$'\n'/ }"
-	gpu="${gpu#*[}"
-	gpu="${gpu%]*}"
-
-	# Print system info to screen
-    printf "%s\n" "${delimiter}"
-    printf "| [+] System info\n"
-    printf "%s\n" "${delimiter}"
-	printf "| [+] Architecture: %s\n" "${arch}"
-    printf "| [+] OS: %s\n" "${os}"
-    printf "| [+] CPU: %s\n" "${cpu}"
-    printf "| [+] Cores: %s\n" "${cores}"
-    printf "| [+] Threads: %s\n" "${threads}"
-    printf "| [+] Min frequency: %0.2f GHz\n" "${min_freq:-NaN}"
-	printf "| [+] Max frequency: %0.2f GHz\n" "${max_freq:-NaN}"
-    printf "| [+] Memory: %.2f GB\n" "${memory:-NaN}"
-    printf "| [+] Uptime: %s\n" "${uptime}"
-	printf "| [+] GPU: %s\n" "${gpu}"
-    printf "%s\n" "${delimiter}"
-
-	# Write system info to file
-	{
-		printf "%s\n" "${delimiter}";
-		printf "| [+] System info\n";
-		printf "%s\n" "${delimiter}";
-		printf "| [+] Architecture: %s\n" "${arch}";
-		printf "| [+] OS: %s\n" "${os}";
-		printf "| [+] CPU: %s\n" "${cpu}";
-		printf "| [+] Cores: %s\n" "${cores}";
-		printf "| [+] Threads: %s\n" "${threads}";
-		printf "| [+] Min frequency: %0.2f GHz\n" "${min_freq:-NaN}";
-		printf "| [+] Max frequency: %0.2f GHz\n" "${max_freq:-NaN}";
-		printf "| [+] Memory: %.2f GB\n" "${memory:-NaN}";
-		printf "| [+] Uptime: %s\n" "${uptime}";
-		printf "| [+] GPU: %s\n" "${gpu}";
-		printf "%s\n" "${delimiter}";
-	} >> "${results_file}"
 }
 
 selectBenchmark() {
@@ -204,14 +91,6 @@ benchmark() {
 		printf "| [+] Selected scene: %s\n" "${scene}"
 		printf "%s\n" "${delimiter}"
 	} >> "${results_file}"
-}
-
-backupResults() {
-	# Backup previous results file before a new benchmark run
-	if [[ -f "${result_file}" ]]; then
-		result_file_count=$(find "${benchmark_dir}" -type f -name "results*" | wc -l)
-		mv "${result_file}" "${result_file%.*}_${result_file_count}.${result_file#*.}"
-	fi
 }
 
 #  ------
