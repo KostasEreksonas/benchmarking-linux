@@ -107,56 +107,6 @@ unpack() {
 	cd "../"
 }
 
-cpuPreset() {
-	# Select preset for CPU encode
-	PS3="[+] Choose preset: "
-    presets=("ultrafast" "superfast" "veryfast" "faster" "fast" "medium" "slow" "slower" "veryslow" "placebo")
-    select preset in "${presets[@]}"; do
-        case "${preset}" in
-			"ultrafast")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "superfast")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "veryfast")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "faster")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "fast")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "medium")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "slow")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "slower")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-            "veryslow")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-			"placebo")
-				printf "%s\n" "${preset}"
-                break
-                ;;
-		esac
-	done
-}
-
 cpuEncoder() {
 	# Choose encoder for cpu
 	PS3="[+] Choose encoder: "
@@ -173,29 +123,6 @@ cpuEncoder() {
                 ;;
         esac
 	done
-}
-
-setCRF() {
-	# Set crf value for CPU encoding
-	local enc="${1}"
-
-	# Set max crf value based on encoder
-    if [ "${enc}" == "libx264" ]; then
-        crf_max=53
-		crf_default=17
-    elif [ "${enc}" = "libx265" ]; then
-        crf_max=51
-		crf_default=18
-    fi
-
-    # Set crf parameter value
-    while ! [[ "${crf}" =~ [0-9] && "${crf}" -ge 0 && "${crf}" -le "${crf_max}" ]]; do
-		read -r -p "[+] Choose CRF value (0-${crf_max}, defult: ${crf_default}): " crf
-		if [ -z "${crf}" ]; then crf="${crf:-"${crf_default}"}"; fi
-	done
-
-	# Return crf value
-	printf "%s\n" "${crf}"
 }
 
 cpuBench() {
@@ -255,44 +182,6 @@ cpuBench() {
 	cd "../"
 }
 
-gpuPreset() {
-	# Select preset for GPU encode
-	PS3="[+] Select preset: "
-	presets=("p1" "p2" "p3" "p4" "p5" "p6" "p7")
-	select preset in "${presets[@]}"; do
-		case "${preset}" in
-			"p1")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p2")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p3")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p4")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p5")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p6")
-				printf "%s\n" "${preset}"
-				break
-				;;
-			"p7")
-				printf "%s\n" "${preset}"
-				break
-				;;
-		esac
-	done
-}
-
 gpuEncoder() {
 	# Set encoding for GPU benchmark
 	PS3="[+] Select encoding: "
@@ -305,66 +194,6 @@ gpuEncoder() {
 				;;
 			"hevc_nvenc")
 				printf "%s\n" "${encoder}"
-				break
-				;;
-		esac
-	done
-}
-
-gpuTune() {
-	# Get tune level for gpu benchmark
-	PS3="[+] Select tune: "
-	tunes=("hq" "ll" "ull" "lossless")
-	select tune in "${tunes[@]}"; do
-		case "${tune}" in
-			"hq")
-				printf "%s\n" "${tune}"
-				break
-				;;
-			"ll")
-				printf "%s\n" "${tune}"
-				break
-				;;
-			"ull")
-				printf "%s\n" "${tune}"
-				break
-				;;
-			"lossless")
-				printf "%s\n" "${tune}"
-				break
-				;;
-		esac
-	done
-}
-
-gpuLevel() {
-	# Set encoding level restriction
-	PS3="[+] Set encoding level: "
-	levels=("3.1" "4.0" "4.1" "5.0" "5.1" "5.2")
-	select level in "${levels[@]}"; do
-		case "${level}" in
-			"3.1")
-				printf "%s\n" "${level}"
-				break
-				;;
-			"4.0")
-				printf "%s\n" "${level}"
-				break
-				;;
-			"4.1")
-				printf "%s\n" "${level}"
-				break
-				;;
-			"5.0")
-				printf "%s\n" "${level}"
-				break
-				;;
-			"5.1")
-				printf "%s\n" "${level}"
-				break
-				;;
-			"5.2")
-				printf "%s\n" "${level}"
 				break
 				;;
 		esac
@@ -450,52 +279,7 @@ benchmark() {
 				encoder="$(cpuEncoder)"
 				printf "%s\n" "${delimiter}"
 				printf "| [+] Selected encoder: %s\n" "${encoder}"
-				if [[ "${encoder}" == "libx264" ]]; then
-					printf "| [+] Defaults for %s: preset - veryslow, crf - 17\n" "${encoder}"
-				elif [[ "${encoder}" == "libx265" ]]; then
-					printf "| [+] Defaults for %s: preset - medium, crf - 18\n" "${encoder}"
-				fi
-				read -p "| [+] Do you want to use defaults for ${encoder}? [Y/N] " choice
-				while true; do
-					if [[ "${choice}" == "Y" ]] || [[ "${choice}" == "y" ]]; then
-						if [[ "${encoder}" == "libx264" ]]; then
-							preset="veryslow"
-							crf=17
-						elif [[ "${encoder}" == "libx265" ]]; then
-							preset="medium"
-							crf=18
-						fi
-						printf "| [+] Defaults set\n"
-						printf "%s\n" "${delimiter}"
-						break
-					elif [[ "${choice}" == "N" ]] || [[ "${choice}" == "n" ]]; then
-						printf "%s\n" "${delimiter}"
-						# Set preset
-						preset="$(cpuPreset)"
-						printf "%s\n" "${delimiter}"
-						printf "| [+] Selected preset: %s\n" "${preset}"
-						printf "%s\n" "${delimiter}"
-
-						# Set CRF value
-						crf="$(setCRF "${encoder}")"
-						printf "%s\n" "${delimiter}"
-						printf "| [+] Selected CRF: %s\n" "${crf}"
-						printf "%s\n" "${delimiter}"
-						break
-					fi
-				done
-
-				# Write parameters to results file
-				{
-					printf "%s\n" "${delimiter}";
-					printf "| [+] Encoder parameters\n";
-					printf "%s\n" "${delimiter}";
-					printf "| [+] Benchmark: %s\n" "${bench}";
-					printf "| [+] Encoder: %s\n" "${encoder}";
-					printf "| [+] Preset: %s\n" "${preset}";
-					printf "| [+] CRF: %s\n" "${crf}";
-					printf "%s\n" "${delimiter}";
-				} >> "${result_file}"
+				printf "%s\n" "${delimiter}"
 
 				break
 				;;
@@ -511,52 +295,6 @@ benchmark() {
 				printf "%s\n" "${delimiter}"
 				printf "| [+] Selected encoder: %s\n" "${encoder}"
 				printf "%s\n" "${delimiter}"
-				printf "| [+] Defaults for %s: preset - p7, tune - lossless level - 5.2\n" "${encoder}"
-				read -p "| [+] Do you want to use defaults for ${encoder}? [Y/N] " choice
-				while true; do
-					if [[ "${choice}" == "Y" ]] || [[ "${choice}" == "y" ]]; then
-						preset="p7"
-						tune="lossless"
-						level="5.2"
-						printf "| [+] Defaults set\n"
-						printf "%s\n" "${delimiter}"
-						break
-					elif [[ "${choice}" == "N" ]] || [[ "${choice}" == "n" ]]; then
-						printf "%s\n" "${delimiter}"
-
-						# Get preset
-						preset="$(gpuPreset)"
-						printf "%s\n" "${delimiter}"
-						printf "| [+] Selected preset: %s\n" "${preset}"
-						printf "%s\n" "${delimiter}"
-
-						# Get tune
-						tune="$(gpuTune)"
-						printf "%s\n" "${delimiter}"
-						printf "| [+] Selected tune: %s\n" "${tune}"
-						printf "%s\n" "${delimiter}"
-
-						# Get level
-						level="$(gpuLevel)"
-						printf "%s\n" "${delimiter}"
-						printf "| [+] Selected level: %s\n" "${level}"
-						printf "%s\n" "${delimiter}"
-						break
-					fi
-				done
-
-				# Write parameters to results file
-				{
-					printf "%s\n" "${delimiter}";
-					printf "| [+] Encoder parameters\n";
-					printf "%s\n" "${delimiter}";
-					printf "| [+] Benchmark: %s\n" "${bench}";
-					printf "| [+] Encoder: %s\n" "${encoder}";
-					printf "| [+] Preset: %s\n" "${preset}";
-					printf "| [+] Tune: %s\n" "${tune}";
-					printf "| [+] Level: %s\n" "${level}";
-					printf "%s\n" "${delimiter}";
-				} >> "${result_file}"
 
 				break
 				;;
@@ -583,9 +321,13 @@ benchmark() {
 		# Benchmark
 		if [[ "${bench}" == "CPU" ]]; then
 			# Start benchmark
-			cpuBench "${encoder}" "${preset}" "${crf}"
+			if [[ "${encoder}" = "libx264" ]]; then
+				cpuBench "${encoder}" "veryslow" "17"
+			elif [[ "${encoder}" = "libx265" ]]; then
+				cpuBench "${encoder}" "medium" "18"
+			fi
 		elif [[ "${bench}" == "GPU" ]]; then
-			gpuBench "${encoder}" "${preset}" "${tune}" "${level}"
+			gpuBench "${encoder}" "p7" "lossless" "5.2"
 		fi
 
 		# Get encoding data of current iteration
