@@ -1,0 +1,435 @@
+#!/bin/bash
+
+# Delimiter
+delimiter="------------------------------------------------------------------------------------------------------------"
+
+checkDependencies() {
+	# Check if all dependencies for the benchmark are installed
+	if ! which openssl 2>/dev/null 1>&2; then missing+=("openssl"); fi
+}
+
+getInfo() {
+    # Get system info
+	arch="$(uname -m)"
+    os="$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
+	os="$(echo "${os}" | sed 's/\"//g')"
+	cpu="$(lscpu | grep "Model name" | cut -d ":" -f 2 | xargs)"
+    cores="$(grep "cpu cores" /proc/cpuinfo | head -1 | cut -d ":" -f 2 | tr -d " ")"
+    threads="$(grep -c processor /proc/cpuinfo)"
+    min_freq="$(echo "$(lscpu | grep "CPU min" | cut -d ":" -f 2 | cut -d "." -f 1 | tr -d " ")/1000" | bc -l 2>/dev/null)"
+    max_freq="$(echo "$(lscpu | grep "CPU max" | cut -d ":" -f 2 | cut -d "." -f 1 | tr -d " ")/1000" | bc -l 2>/dev/null)"
+    memory="$(echo "$(grep MemTotal /proc/meminfo | cut -d ":" -f 2 | tr -d " kB")/1024/1024" | bc -l 2>/dev/null)"
+    uptime="$(formatTime "$(cut -d " " -f 1 < /proc/uptime)")"
+    gpu=$(lspci | grep -E 'VGA|3D')
+	gpu="${gpu//$'\n'/ }"
+	gpu="${gpu#*[}"
+	gpu="${gpu%]*}"
+
+	# Print system info to screen
+    printf "%s\n" "${delimiter}"
+    printf "| [+] System info\n"
+    printf "%s\n" "${delimiter}"
+	printf "| [+] Architecture: %s\n" "${arch}"
+    printf "| [+] OS: %s\n" "${os}"
+    printf "| [+] CPU: %s\n" "${cpu}"
+    printf "| [+] Cores: %s\n" "${cores}"
+    printf "| [+] Threads: %s\n" "${threads}"
+    printf "| [+] Min frequency: %0.2f GHz\n" "${min_freq:-NaN}"
+	printf "| [+] Max frequency: %0.2f GHz\n" "${max_freq:-NaN}"
+    printf "| [+] Memory: %.2f GB\n" "${memory:-NaN}"
+    printf "| [+] Uptime: %s\n" "${uptime}"
+	printf "| [+] GPU: %s\n" "${gpu}"
+    printf "%s\n" "${delimiter}"
+
+	# Write system info to file
+	{
+		printf "%s\n" "${delimiter}";
+		printf "| [+] System info\n";
+		printf "%s\n" "${delimiter}";
+		printf "| [+] Architecture: %s\n" "${arch}";
+		printf "| [+] OS: %s\n" "${os}";
+		printf "| [+] CPU: %s\n" "${cpu}";
+		printf "| [+] Cores: %s\n" "${cores}";
+		printf "| [+] Threads: %s\n" "${threads}";
+		printf "| [+] Min frequency: %0.2f GHz\n" "${min_freq:-NaN}";
+		printf "| [+] Max frequency: %0.2f GHz\n" "${max_freq:-NaN}";
+		printf "| [+] Memory: %.2f GB\n" "${memory:-NaN}";
+		printf "| [+] Uptime: %s\n" "${uptime}";
+		printf "| [+] GPU: %s\n" "${gpu}";
+		printf "%s\n" "${delimiter}";
+	} >> "${result_file}"
+}
+
+formatTime() {
+    # Format time to <xx>h <xx>m <xx.xxx>s
+    time="${1}"
+
+	# Get seconds value
+    seconds="${time%%.*}"
+    if [[ -z "${seconds}" ]]; then seconds=0; fi
+    miliseconds="${time##*.}"
+    if [[ -z "${miliseconds}" ]]; then miliseconds=0; fi
+	if [[ "${seconds}" -lt 60 ]]; then
+        printf "%s.%s seconds\n" "${seconds}" "${miliseconds}"
+    elif [[ "${seconds}" -ge 60 && "${seconds}" -lt 3600 ]]; then
+        minutes="$(echo "${seconds}/60" | bc -l | cut -d "." -f 1)"
+        if [[ -z "${minutes}" ]]; then minutes=0; fi
+		seconds="$((${seconds}-60*${minutes}))"
+        if [[ -z "${seconds}" ]]; then seconds=0; fi
+		if [[ "${minutes}" == 1 ]]; then
+			printf "%s minute %s.%s seconds\n" "${minutes}" "${seconds}" "${miliseconds}"
+		else
+			printf "%s minutes %s.%s seconds\n" "${minutes}" "${seconds}" "${miliseconds}"
+		fi
+	elif [[ "${seconds}" -ge 3600 ]]; then
+        hours="$(echo "${seconds}/3600" | bc -l | cut -d "." -f 1)"
+        if [[ -z "${hours}" ]]; then hours=0; fi
+        seconds="$((${seconds}-3600*${hours}))"
+        minutes="$(echo "${seconds}/60" | bc -l | cut -d "." -f 1)"
+        if [[ -z "${minutes}" ]]; then minutes=0; fi
+        seconds="$((${seconds}-60*${minutes}))"
+        if [[ -z "${seconds}" ]]; then seconds=0; fi
+		if [[ "${hours}" == 1 ]] && [[ "${minutes}" == 1 ]]; then
+			printf "%s hour %s minute %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
+		elif [[ "${hours}" == 1 ]] && [[ "${minutes}" -gt 1 ]]; then
+			printf "%s hour %s minutes %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
+		elif [[ "${hours}" -gt 1 ]] && [[ "${minutes}" == 1 ]]; then
+			printf "%s hours %s minute %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
+		else
+			printf "%s hours %s minutes %s.%s seconds\n" "${hours}" "${minutes}" "${seconds}" "${miliseconds}"
+		fi
+	fi
+}
+
+defaultDir() {
+	# Create default directories for benchmark
+	if ! [[ -d "${default_directory}" ]]; then
+		mkdir -p "${default_directory}"
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Directory %s created\n" "${default_directory}"
+		printf "%s\n" "${delimiter}"
+	else
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Directory %s exists\n" "${default_directory}"
+		printf "%s\n" "${delimiter}"
+	fi
+
+	# Change to default directory
+	cd "${default_directory}"
+}
+
+backupResults() {
+	# Backup previous results file before a new benchmark run
+	if [[ -f "${result_file}" ]]; then
+		result_file_count=$(find . -type f -name "results*" | wc -l)
+		mv "${result_file}" "${result_file%.*}_${result_file_count}.${result_file#*.}"
+	fi
+}
+
+chooseAlgorithm() {
+	# Choose algorithm to benchmark
+	PS3="[+] Choose algorithm: "
+	algorithms=("md5" "sha1" "sha256" "sha512" "des" "des-ede3" "aes-128-cbc" "aes-192-cbc" "aes-256-cbc" "rsa2048" "dsa2048" "chacha20-poly1305")
+	select algorithm in "${algorithms[@]}"; do
+		case "${algorithm}" in
+			"md5")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"sha1")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"sha256")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"sha512")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"des")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"des-ede3")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"aes-128-cbc")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"aes-192-cbc")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"aes-256-cbc")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"rsa2048")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"dsa2048")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+			"chacha20-poly1305")
+				printf "%s\n" "${algorithm}"
+				break
+				;;
+		esac
+	done
+}
+
+showProgress() {
+	# Show progress of a benchmark iteration
+
+	# Get local variables
+	local tmp_file="${1}"
+
+	# Get last line of tmp file
+    line="$(sed 's/\r/\n/g' "${tmp_file}" | tail -1)"
+
+	# Update text
+    text="$(echo "${line}" | awk '{print "| [+] " $0}')"
+
+	# Print newline at the end of an encode
+	printf "%s" "${text}"
+
+}
+
+benchmark() {
+	# Run benchmark
+
+	# Select algorithm
+	algo="$(chooseAlgorithm)"
+
+	printf "%s\n" "${delimiter}"
+	printf "[+] Algorithm: %s\n" "${algo}"
+	printf "%s\n" "${delimiter}"
+
+	{
+		printf "%s\n" "${delimiter}"
+		printf "[+] Algorithm: %s\n" "${algo}"
+		printf "%s\n" "${delimiter}"
+	} >> "${result_file}"
+
+	# Initialize fastest scores
+	fastest_16=0
+	fastest_64=0
+	fastest_256=0
+	fastest_1024=0
+	fastest_8192=0
+	fastest_16384=0
+
+	for (( i=0; i<"${iterations}"; i++ )); do
+
+		# Print iteration
+		printf "%s\n" "${delimiter}"
+		printf "Iteration: %s\n" "$((i+1))"
+		printf "%s\n" "${delimiter}"
+
+		# Write iteration number to a result file
+		{
+			printf "%s\n" "${delimiter}"
+			printf "Iteration: %s\n" "$((i+1))"
+			printf "%s\n" "${delimiter}"
+		} >> "${result_file}"
+
+		# Open FD3
+		tmp_file="/tmp/bench_data"
+		exec 3<> "${tmp_file}"
+
+		# Main command
+		nohup 1>/dev/null openssl speed "${algo}" 2>&3 &
+
+		# Get pid of the backgrounded benchmark process
+		pid="${!}"
+
+		# If the script is killed, kill benchmark also
+		trap 'kill ${pid} 2>/dev/null' EXIT
+
+		# Initial line count for a temporary file
+		tmp="$(cat ${tmp_file} | wc -l)"
+
+		# Print benchmark progress
+		# Multiple tests are run, when one finishes - print result on the same line and move next test to a new line
+		while kill -0 "${pid}" 2> /dev/null; do
+			# Current line count
+			line_count="$(cat ${tmp_file} | wc -l)"
+
+			if [[ "${tmp}" == "${line_count}" ]]; then
+				showProgress "${tmp_file}" && printf "\r"
+			else
+				# Get last 2 lines of a temporary file
+				line1="$(sed 's/\r/\n/g' "${tmp_file}" | tail -2 | head -1)"
+				line2="$(sed 's/\r/\n/g' "${tmp_file}" | tail -1)"
+
+				# Update text
+				text1="$(echo "${line1}" | awk '{print "| [+] " $0}')"
+				text2="$(echo "${line2}" | awk '{print "| [+] " $0}')"
+
+				# Print newline at the end of a test
+				printf "%s\n" "${text1}"
+				printf "%s\n" "${text1}" >> "${result_file}"
+				printf "%s\r" "${text2}"
+			fi
+
+			# Update line count
+			tmp="${line_count}"
+
+			# Re-check condition every .5 seconds
+			sleep .5
+		done
+
+		# Last progress update
+		showProgress "${tmp_file}" && printf "\n"
+		printf "%s\n" "${delimiter}"
+
+		# Write last progress update to file
+		{
+			showProgress "${tmp_file}" && printf "\n"
+			printf "%s\n" "${delimiter}"
+		} >> "${result_file}"
+
+		# Disable the trap on a normal exit.
+		trap - EXIT
+
+		# Get results
+		result_16=$(grep -w "on 16" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_16}" -gt "${fastest_16}" ]]; then
+			fastest_16="${result_16}"
+		fi
+		result_64=$(grep -w "on 64" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_64}" -gt "${fastest_64}" ]]; then
+			fastest_64="${result_64}"
+		fi
+		result_256=$(grep -w "on 256" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_256}" -gt "${fastest_256}" ]]; then
+			fastest_256="${result_256}"
+		fi
+		result_1024=$(grep -w "on 1024" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_1024}" -gt "${fastest_1024}" ]]; then
+			fastest_1024="${result_1024}"
+		fi
+		result_8192=$(grep -w "on 8192" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_8192}" -gt "${fastest_8192}" ]]; then
+			fastest_8192="${result_8192}"
+		fi
+		result_16384=$(grep -w "on 16384" ${tmp_file} | cut -d " " -f 10)
+		if [[ "${result_16384}" -gt "${fastest_16384}" ]]; then
+			fastest_16384="${result_16384}"
+		fi
+
+		#Close FD3
+		exec 3>&-
+
+		# Remove temporary file
+		rm "${tmp_file}"
+	done
+
+	# Print fastest score
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Results\n"
+	printf "%s\n" "${delimiter}"
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Fastest 16 bit score: %s\n" "${fastest_16}"
+	printf "| [+] Fastest 64 bit score: %s\n" "${fastest_64}"
+	printf "| [+] Fastest 256 bit score: %s\n" "${fastest_256}"
+	printf "| [+] Fastest 1024 bit score: %s\n" "${fastest_1024}"
+	printf "| [+] Fastest 8192 bit score: %s\n" "${fastest_8192}"
+	printf "| [+] Fastest 16384 bit score: %s\n" "${fastest_16384}"
+	printf "%s\n" "${delimiter}"
+
+	# Write fastest score to result file
+	{
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Results\n"
+		printf "%s\n" "${delimiter}"
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Fastest 16 bit score: %s\n" "${fastest_16}"
+		printf "| [+] Fastest 64 bit score: %s\n" "${fastest_64}"
+		printf "| [+] Fastest 256 bit score: %s\n" "${fastest_256}"
+		printf "| [+] Fastest 1024 bit score: %s\n" "${fastest_1024}"
+		printf "| [+] Fastest 8192 bit score: %s\n" "${fastest_8192}"
+		printf "| [+] Fastest 16384 bit score: %s\n" "${fastest_16384}"
+		printf "%s\n" "${delimiter}"
+	} >> "${result_file}"
+}
+
+#  ------
+# | MAIN |
+#  ------
+
+# Array to store missing dependencies
+missing=()
+
+# Check dependencies
+checkDependencies
+
+if [[ -z "${missing[*]}" ]]; then
+	# Default directory
+	default_directory="${HOME}/Documents/benchmarks/benchmark-openssl"
+
+	# Results file
+	result_file="results.txt"
+
+	# Create default dir
+	defaultDir
+
+	# Backup results file
+	backupResults
+
+	# Number of iterations
+	iterations=5
+
+	# Print start date for a benchmark
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Benchmark started at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)"
+	printf "%s\n" "${delimiter}"
+
+	# Write a start date to file
+	{
+		printf "%s\n" ${delimiter};
+		printf "| [+] Benchmark started at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)";
+		printf "%s\n" ${delimiter};
+	} >> "${result_file}"
+
+	# Print iteration count
+	printf "%s\n" "${delimiter}";
+	printf "| [+] Iterations: %s\n" "${iterations}";
+	printf "%s\n" "${delimiter}";
+
+	# Write iterations to file
+	{
+		printf "%s\n" "${delimiter}";
+		printf "| [+] Iterations: %s\n" "${iterations}";
+		printf "%s\n" "${delimiter}";
+	} >> "${result_file}"
+
+	# Print system info
+	getInfo
+
+	# Run benchmark
+	benchmark
+
+	# Print end date for a benchmark
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Benchmark ended at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)"
+	printf "%s\n" "${delimiter}"
+
+	# Write end date to a file
+	{
+		printf "%s\n" "${delimiter}";
+		printf "| [+] Benchmark ended at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)";
+		printf "%s\n" "${delimiter}";
+		printf "\r\n";
+	} >> "${result_file}"
+else
+	printf "%s\n" "${delimiter}";
+	printf "| [+] Missing dependencies: ${missing[*]} | OS: %s | Consult distribution docs on how to install required dependencies and try again\n" "$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
+	printf "%s\n" "${delimiter}";
+fi
