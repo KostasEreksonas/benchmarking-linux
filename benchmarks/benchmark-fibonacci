@@ -69,7 +69,7 @@ benchmark() {
 		total="$(echo "${end_time}-${start_time}" | bc -l 2> /dev/null)"
 
 		# Update fastest time
-		if [[ "$(echo "${total} < ${fastest}" | bc -l 2> /dev/null)" ]]; then
+		if [ "$(echo "${total} < ${fastest}" | bc -l 2> /dev/null)" -eq 1 ] || [ "$(echo "${fastest} == 0" | bc -l 2> /dev/null)" -eq 1 ]; then
 			fastest="${total}"
 		fi
 
