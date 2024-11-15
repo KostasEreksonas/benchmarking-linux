@@ -95,7 +95,7 @@ benchmark() {
 	# Print results
 	printf "%s\n" "${delimiter}"
 	printf "| [+] Fastest time: %s s\n" "${fastest}"
-	printf "| [+] Average time: %s s\n" "$(echo "${average} / ${iterations}" | bc -l)"
+	printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l)"
 	printf "%s\n" "${delimiter}"
 
 	# write results to a file
