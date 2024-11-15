@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# Single-thread benchmark using Python
+
+#  -----------
+# | Delimiter |
+#  -----------
+delimiter="------------------------------------------------------------------------------------------------------------"
+
+#  ---------
+# | Sources |
+#  ---------
+source assets/getInfo.sh
+source assets/defaultDir.sh
+source assets/backupResults.sh
+source assets/showProgress.sh
+
+checkDependencies() {
+	# Check if all dependencies for the benchmark are installed
+	if ! which python 2>/dev/null 1>&2; then missing+=("python"); fi
+}
+
+selectBenchmark() {
+	# Select nth number of Fibonacci sequence
+	PS3="[+] Select benchmark: "
+	benchmarks=("1M" "32M")
+	select benchmark in "${benchmarks[@]}"; do
+		case "${benchmark}" in
+			"1M")
+				printf "1\n"
+				break
+				;;
+			"32M")
+				printf "32\n"
+				break
+				;;
+		esac
+	done
+}
+
+benchmark() {
+	# Run benchmark
+	bench="$(selectBenchmark)"
+
+	if [[ -z "data/" ]]; then
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Downloading benchmark\n"
+		printf "%s\n" "${delimiter}"
+		curl -s "" > data/fibonacci.py
+	else
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Downloading benchmark\n"
+		printf "%s\n" "${delimiter}"
+	fi
+
+	python3 data/fibonacci.py "${bench}"
+}
+
+#  ------
+# | Main |
+#  ------
+
+# Array to store missing dependencies
+missing=()
+
+# Check dependencies
+checkDependencies
+
+if [[ -z "${missing[*]}" ]]; then
+	# Default directory
+	default_directory="${HOME}/Documents/benchmarks/benchmark-fibonnaci"
+
+	# Results file
+	result_file="results.txt"
+
+	# Create default dir
+	defaultDir
+
+	# Backup results file
+	backupResults
+
+	# Number of iterations
+	iterations=5
+
+	# Print start date for a benchmark
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Benchmark started at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)"
+	printf "%s\n" "${delimiter}"
+
+	# Write a start date to file
+	{
+		printf "%s\n" ${delimiter};
+		printf "| [+] Benchmark started at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)";
+		printf "%s\n" ${delimiter};
+	} >> "${result_file}"
+
+	# Print iteration count
+	printf "%s\n" "${delimiter}";
+	printf "| [+] Iterations: %s\n" "${iterations}";
+	printf "%s\n" "${delimiter}";
+
+	# Write iterations to file
+	{
+		printf "%s\n" "${delimiter}";
+		printf "| [+] Iterations: %s\n" "${iterations}";
+		printf "%s\n" "${delimiter}";
+	} >> "${result_file}"
+
+	# Print system info
+	getInfo
+
+	# Run benchmark
+	benchmark
+
+	# Print end date for a benchmark
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Benchmark ended at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)"
+	printf "%s\n" "${delimiter}"
+
+	# Write end date to a file
+	{
+		printf "%s\n" "${delimiter}";
+		printf "| [+] Benchmark ended at %s\n" "$(date +%Y-%m-%d_%H-%M-%S)";
+		printf "%s\n" "${delimiter}";
+		printf "\r\n";
+	} >> "${result_file}"
+else
+	printf "%s\n" "${delimiter}";
+	printf "| [+] Missing dependencies: ${missing[*]} | OS: %s | Consult distribution docs on how to install required dependencies and try again\n" "$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
+	printf "%s\n" "${delimiter}";
+fi
