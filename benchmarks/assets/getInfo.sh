@@ -3,7 +3,7 @@
 #  ---------
 # | Sources |
 #  ---------
-source formatTime.sh
+source assets/formatTime.sh
 
 getInfo() {
     # Get system info

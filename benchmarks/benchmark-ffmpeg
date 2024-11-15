@@ -10,11 +10,11 @@ delimiter="---------------------------------------------------------------------
 #  ---------
 # | Sources |
 #  ---------
-source getInfo.sh
-source formatTime.sh
-source defaultDir.sh
-source backupResults.sh
-source showProgress.sh
+source assets/getInfo.sh
+source assets/formatTime.sh
+source assets/defaultDir.sh
+source assets/backupResults.sh
+source assets/showProgress.sh
 
 checkDependencies() {
 	# Check if all dependencies for the benchmark are installed

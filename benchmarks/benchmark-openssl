@@ -8,10 +8,10 @@ delimiter="---------------------------------------------------------------------
 #  ---------
 # | Sources |
 #  ---------
-source getInfo.sh
-source defaultDir.sh
-source backupResults.sh
-source showProgress.sh
+source assets/getInfo.sh
+source assets/defaultDir.sh
+source assets/backupResults.sh
+source assets/showProgress.sh
 
 #  -----------
 # | Functions |
