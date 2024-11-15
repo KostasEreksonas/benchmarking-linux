@@ -6,9 +6,10 @@ import sys
 def fibonacci(n):
     a, b = 0, 1
 
-    for _ in range(0, n):
+    for i in range(0, n):
         a, b = b, (a + b)
-    return a
+        print(f"| [+] Counting {i+1}-nth number", end='\r', flush=True)
+    print(end='\n')
 
 # Driver Program
 fibonacci(int(sys.argv[1]))
