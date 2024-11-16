@@ -25,15 +25,35 @@ checkDependencies() {
 selectBenchmark() {
 	# Select nth number of Fibonacci sequence
 	PS3="[+] Select benchmark: "
-	benchmarks=("1M" "32M")
+	benchmarks=("512K" "1M" "2M" "4M" "8M" "16M" "32M")
 	select benchmark in "${benchmarks[@]}"; do
 		case "${benchmark}" in
+			"512K")
+				printf "${benchmark} 512000\n"
+				break
+				;;
 			"1M")
-				printf "1000000\n"
+				printf "${benchmark} 1000000\n"
+				break
+				;;
+			"2M")
+				printf "${benchmark} 2000000\n"
+				break
+				;;
+			"4M")
+				printf "${benchmark} 4000000\n"
+				break
+				;;
+			"8M")
+				printf "${benchmark} 8000000\n"
+				break
+				;;
+			"16M")
+				printf "${benchmark} 16000000\n"
 				break
 				;;
 			"32M")
-				printf "32000000\n"
+				printf "${benchmark} 32000000\n"
 				break
 				;;
 		esac
@@ -42,7 +62,26 @@ selectBenchmark() {
 
 benchmark() {
 	# Run benchmark
-	bench="$(selectBenchmark)"
+
+	# Select benchmark
+	data="$(selectBenchmark)"
+
+	# Parse data
+	IFS=' ' read -ra ADDR <<< "${data}"
+	bench="${ADDR[0]}"
+	data="${ADDR[1]}"
+
+	# Print selected benchmark
+	printf "%s\n" "${delimiter}"
+	printf "| [+] Selected benchmark: %s\n" "${bench}"
+	printf "%s\n" "${delimiter}"
+
+	# Write selected benchmark to a file
+	{
+		printf "%s\n" "${delimiter}"
+		printf "| [+] Selected benchmark: %s\n" "${bench}"
+		printf "%s\n" "${delimiter}"
+	} >> "${result_file}"
 
 	# Download benchmark script to ${defaultDir}/data/, if it does not exist
 	if ! [[ -f "$(pwd)/data/fibonacci.py" ]]; then
@@ -62,7 +101,7 @@ benchmark() {
 
 		# Start benchmark
 		start_time="$(date +%s.%3N)"
-		python3 data/fibonacci.py "${bench}"
+		python3 data/fibonacci.py "${data}"
 		end_time="$(date +%s.%3N)"
 
 		# Get time of current iteration
