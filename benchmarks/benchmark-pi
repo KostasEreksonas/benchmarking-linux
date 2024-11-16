@@ -25,9 +25,13 @@ checkDependencies() {
 selectBenchmark() {
 	# Select nth number of Fibonacci sequence
 	PS3="[+] Select benchmark: "
-	benchmarks=("512K" "1M" "2M" "4M" "8M" "16M" "32M")
+	benchmarks=("100K" "512K" "1M" "2M" "4M" "8M" "16M" "32M")
 	select benchmark in "${benchmarks[@]}"; do
 		case "${benchmark}" in
+			"100K")
+				printf "${benchmark} 100000\n"
+				break
+				;;
 			"512K")
 				printf "${benchmark} 512000\n"
 				break
