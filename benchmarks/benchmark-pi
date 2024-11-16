@@ -25,11 +25,15 @@ checkDependencies() {
 selectBenchmark() {
 	# Select nth number of Fibonacci sequence
 	PS3="[+] Select benchmark: "
-	benchmarks=("100K" "512K" "1M" "2M" "4M" "8M" "16M" "32M")
+	benchmarks=("100K" "256K" "512K" "1M" "2M" "4M" "8M" "16M" "32M")
 	select benchmark in "${benchmarks[@]}"; do
 		case "${benchmark}" in
 			"100K")
 				printf "${benchmark} 100000\n"
+				break
+				;;
+			"256K")
+				printf "${benchmark} 256000\n"
 				break
 				;;
 			"512K")
@@ -88,7 +92,7 @@ benchmark() {
 	} >> "${result_file}"
 
 	# Download benchmark script to ${defaultDir}/data/, if it does not exist
-	if ! [[ -f "$(pwd)/data/fibonacci.py" ]]; then
+	if ! [[ -f "$(pwd)/data/pi_chudnovsky_bs.py" ]]; then
 		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/pi/pi_chudnovsky_bs.py" > "pi_chudnovsky_bs.py"
 		chmod +x "pi_chudnovsky_bs.py"
 		mv "pi_chudnovsky_bs.py" "data/"
@@ -137,15 +141,15 @@ benchmark() {
 
 	# Print results
 	printf "%s\n" "${delimiter}"
-	printf "| [+] Fastest time: %s s\n" "${fastest}"
-	printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l)"
+	printf "| [+] Fastest time: %.3f s\n" "$(echo "${fastest}" | bc -l 2> /dev/null)"
+	printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l 2> /dev/null)"
 	printf "%s\n" "${delimiter}"
 
 	# write results to a file
 	{
 		printf "%s\n" "${delimiter}"
-		printf "| [+] Fastest time: %s s\n" "${fastest}"
-		printf "| [+] Average time: %s s\n" "$(echo "${average} / ${iterations}" | bc -l)"
+		printf "| [+] Fastest time: %.3f s\n" "$(echo "${fastest}" | bc -l 2> /dev/null)"
+		printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l 2> /dev/null)"
 		printf "%s\n" "${delimiter}"
 	} >> "${result_file}"
 }
