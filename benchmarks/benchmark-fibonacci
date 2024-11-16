@@ -133,15 +133,15 @@ benchmark() {
 
 	# Print results
 	printf "%s\n" "${delimiter}"
-	printf "| [+] Fastest time: %s s\n" "${fastest}"
-	printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l)"
+	printf "| [+] Fastest time: %.3f s\n" "$(echo "${fastest}" | bc -l 2> /dev/null)"
+	printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l 2> /dev/null)"
 	printf "%s\n" "${delimiter}"
 
 	# write results to a file
 	{
 		printf "%s\n" "${delimiter}"
-		printf "| [+] Fastest time: %s s\n" "${fastest}"
-		printf "| [+] Average time: %s s\n" "$(echo "${average} / ${iterations}" | bc -l)"
+		printf "| [+] Fastest time: %.3f s\n" "$(echo "${fastest}" | bc -l 2> /dev/null)"
+		printf "| [+] Average time: %.3f s\n" "$(echo "${average} / ${iterations}" | bc -l 2> /dev/null)"
 		printf "%s\n" "${delimiter}"
 	} >> "${result_file}"
 }
