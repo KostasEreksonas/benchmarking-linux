@@ -92,10 +92,10 @@ benchmark() {
 	} >> "${result_file}"
 
 	# Download benchmark script to ${defaultDir}/data/, if it does not exist
-	if ! [[ -f "$(pwd)/data/pi_chudnovsky_bs.py" ]]; then
-		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/pi/pi_chudnovsky_bs.py" > "pi_chudnovsky_bs.py"
-		chmod +x "pi_chudnovsky_bs.py"
-		mv "pi_chudnovsky_bs.py" "data/"
+	if ! [[ -f "$(pwd)/data/pi_calc.py" ]]; then
+		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/pi/pi_calc.py" > "pi_calc.py"
+		chmod +x "pi_calc.py"
+		mv "pi_calc.py" "data/"
 	fi
 
 	# Initialize variables for fastest and average times
@@ -109,7 +109,7 @@ benchmark() {
 
 		# Start benchmark
 		start_time="$(date +%s.%3N)"
-		python3 data/pi_chudnovsky_bs.py "${data}"
+		python3 data/pi_calc.py "${data}"
 		end_time="$(date +%s.%3N)"
 
 		# Get time of current iteration
