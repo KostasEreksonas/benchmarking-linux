@@ -93,7 +93,7 @@ benchmark() {
 
 	# Download benchmark script to ${defaultDir}/data/, if it does not exist
 	if ! [[ -f "$(pwd)/data/pi_calc.py" ]]; then
-		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/pi/pi_calc.py" > "pi_calc.py"
+		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/data/pi/pi_calc.py" > "pi_calc.py"
 		chmod +x "pi_calc.py"
 		mv "pi_calc.py" "data/"
 	fi

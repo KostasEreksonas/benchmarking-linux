@@ -85,7 +85,7 @@ benchmark() {
 
 	# Download benchmark script to ${defaultDir}/data/, if it does not exist
 	if ! [[ -f "$(pwd)/data/fibonacci.py" ]]; then
-		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/fibonacci/fibonacci.py" > "fibonacci.py"
+		curl -s "https://raw.githubusercontent.com/KostasEreksonas/benchmarking-linux/refs/heads/main/benchmarks/data/fibonacci/fibonacci.py" > "fibonacci.py"
 		chmod +x "fibonacci.py"
 		mv "fibonacci.py" "data/"
 	fi
@@ -158,7 +158,7 @@ checkDependencies
 
 if [[ -z "${missing[*]}" ]]; then
 	# Default directory
-	default_directory="${HOME}/Documents/benchmarks/benchmark-fibonnaci"
+	default_directory="${HOME}/Documents/benchmarks/benchmark-fibonacci"
 
 	# Results file
 	result_file="results.txt"
