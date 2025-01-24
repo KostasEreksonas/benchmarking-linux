@@ -510,6 +510,6 @@ if [[ -z "${missing[*]}" ]]; then
 	} >> "${result_file}"
 else
 	printf "%s\n" "${delimiter}";
-	printf "| [+] Missing dependencies: ${missing[*]} | OS: %s | Consult distribution docs on how to install required dependencies and try again\n" "$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
+	printf "| [+] Missing dependencies: %s | OS: %s | Consult distribution docs on how to install required dependencies and try again\n" "${missing[*]}" "$(grep -w ID /etc/os-release | cut -d "=" -f 2)"
 	printf "%s\n" "${delimiter}";
 fi
