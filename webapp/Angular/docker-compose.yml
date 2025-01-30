@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: ./mounts/linuxBench
+      dockerfile: Dockerfile.front
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    volumes:
+      - ./linuxBench:/var/www/html
+  back:
+    build:
+      context: ./mounts/RestAPI
+      dockerfile: Dockerfile.back
+    ports:
+      - "81:81"
+    depends_on:
+      - db
+    volumes:
+      - ./RestAPI:/var/www/html
+  db:
+    image: mysql:9
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: benchmark_ffmpeg
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mounts/mysql_data:/var/lib/mysql
