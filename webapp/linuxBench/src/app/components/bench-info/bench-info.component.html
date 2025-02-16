@@ -1,0 +1,115 @@
+<main>
+  <div class="py-5 text-center border border-primary bg-dark text-dark" style="background-image: url('/TUX.webp'); background-size: 100% 100%;;">
+    <div class="row py-lg-5">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Benchmarking Linux</h1>
+        <p class="lead text-dark">
+          Custom Linux benchmarks designed to benchmark and compare performance of various Linux systems.
+        </p>
+        <p class="mb-3">
+          <a class="btn btn-primary m-2" routerLink="/register">Register</a>
+          <a class="btn btn-secondary m-2" routerLink="/about">Main Page</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="album py-5 bg-light">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4" style="height: 600px;">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <div class="card-body">
+              <h1 class="d-flex justify-content-center">FFMPEG</h1>
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b1}}">Results</a>
+                <router-outlet></router-outlet>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b1)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <h1 class="d-flex justify-content-center">FIBONACCI</h1>
+            <div class="card-body">
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b2}}">Results</a>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b2)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <h1 class="d-flex justify-content-center">PI</h1>
+            <div class="card-body">
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b3}}">Results</a>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b3)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <h1 class="d-flex justify-content-center">OPENSSL</h1>
+            <div class="card-body">
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b4}}">Results</a>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b4)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <h1 class="d-flex justify-content-center">POWER</h1>
+            <div class="card-body">
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b5}}">Results</a>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b5)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 box-shadow">
+            <img class="card-img-top" src="/BBB.jpg" alt="Card image cap">
+            <h1 class="d-flex justify-content-center">POVRAY</h1>
+            <div class="card-body">
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto blanditiis dolor
+                hic quos saepe. Blanditiis fugit nulla omnis quae, quis recusandae? Eius fuga fugiat fugit iste minus
+                natus neque perspiciatis?</p>
+              <div class="d-flex justify-content-center mb-3">
+                <a class="btn btn-primary m-2" routerLink="/benchmarks/{{b6}}">Results</a>
+                <a class="btn btn-secondary m-2" (click)="openDialog(b6)">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

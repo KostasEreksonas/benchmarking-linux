@@ -1,0 +1,107 @@
+<section *ngIf="status !== 200">
+  <div class="alert alert-danger justify-content-center">
+    {{ status }} {{ message }}
+  </div>
+</section>
+<section class="bg-light p-3 p-md-4 p-xl-5" *ngIf="status === 200">
+  <form (ngSubmit)="addNewResult(f)" #f="ngForm">
+    <div class="card mt-5">
+      <div class="card-header text-center">Add new result</div>
+      <div class="mb-3">
+        <label for="username" class="form-label p-2">Username</label>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          class="form-control"
+          [(ngModel)]="username"
+          required
+          disabled
+        >
+      </div>
+      <div class="mb-3">
+        <label for="bench_name" class="form-label p-2">Choose Benchmark</label>
+        <select name="bench_name" id="bench_name" class="form-control" [(ngModel)]="bench_name" required>
+          <option value="ffmpeg">FFMPEG (320x180)</option>
+          <option value="fibonacci">FIBONACCI (1M)</option>
+          <option value="pi">PI (1M)</option>
+          <option value="openssl">OPENSSL (MD5)</option>
+          <option value="power">POWER (1M)</option>
+          <option value="povray" >POVRAY</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="bench_type" class="form-label p-2">Select Type</label>
+        <select name="bench_type" id="bench_type" class="form-control" [(ngModel)]="bench_type" required>
+          <option value="cpu">CPU</option>
+          <option value="gpu">GPU</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="model" class="form-label p-2">Model</label>
+        <input
+          type="text"
+          name="model"
+          id="model"
+          class="form-control"
+          [class.is-invalid]="!inputModel.valid && inputModel.touched"
+          [(ngModel)]="model"
+          required
+          minlength="5"
+          maxlength="64"
+          #inputModel="ngModel"
+        >
+        <div class="helper-block" *ngIf="!inputModel.valid && inputModel.touched">"5 to 64 symbols"</div>
+      </div>
+      <div class="mb-3">
+        <label for="frequency" class="form-label p-2">Frequency</label>
+        <input
+          type="text"
+          name="frequency"
+          id="frequency"
+          class="form-control"
+          [class.is-invalid]="!inputFrequency.valid && inputFrequency.touched"
+          [(ngModel)]="frequency"
+          required
+          minlength="8"
+          maxlength="8"
+          #inputFrequency="ngModel"
+        >
+        <div class="helper-block" *ngIf="!inputFrequency.valid && inputFrequency.touched">"Format: X.xx GHz"</div>
+      </div>
+      <div class="mb-3">
+        <label for="average" class="form-label p-2">Average</label>
+        <input
+          type="text"
+          name="average"
+          id="average"
+          class="form-control"
+          [class.is-invalid]="!inputAverage.valid && inputAverage.touched"
+          [(ngModel)]="average"
+          required
+          minlength="4"
+          maxlength="16"
+          #inputAverage="ngModel"
+        >
+        <div class="helper-block" *ngIf="!inputAverage.valid && inputAverage.touched">"4 to 16 symbols"</div>
+      </div>
+      <div class="mb-3">
+        <label for="fastest" class="form-label p-2">Best Result</label>
+        <input
+          type="text"
+          name="fastest"
+          id="fastest"
+          class="form-control"
+          [class.is-invalid]="!inputFastest.valid && inputFastest.touched"
+          [(ngModel)]="fastest"
+          required
+          minlength="4"
+          maxlength="16"
+          #inputFastest="ngModel"
+        >
+        <div class="helper-block" *ngIf="!inputFastest.valid && inputFastest.touched">"4 to 16 symbols"</div>
+      </div>
+      <button type="submit" class="btn btn-success" [disabled]="!f.valid">ADD</button>
+    </div>
+  </form>
+</section>

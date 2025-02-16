@@ -1,0 +1,134 @@
+<section class="bg-light p-3 p-md-4 p-xl-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5">
+        <div class="card border border-light-subtle rounded-4">
+          <div class="card-body p-3 p-md-4 p-xl-5">
+            <div class="row">
+              <div class="col-12">
+                <div class="mb-5">
+                  <div class="text-center mb-4">
+                    <img src="/logo.png" alt="Logo" width="50%"/>
+                  </div>
+                  <h4 class="text-center">Create a profile</h4>
+                </div>
+              </div>
+            </div>
+            <form (ngSubmit)="register(f)" #f="ngForm">
+              <div class="row gy-3 overflow-hidden">
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="email"
+                      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                      class="form-control"
+                      [class.is-invalid]="inputEmail.errors && inputEmail.touched"
+                      name="email"
+                      id="email"
+                      placeholder="mail@email.com"
+                      [(ngModel)]="email"
+                      required
+                      #inputEmail="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="inputEmail.errors && inputEmail.touched">Wrong email format</div>
+                    <label for="email" class="form-label">Email</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="email"
+                      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                      class="form-control"
+                      [class.is-invalid]="emailRepeat.value != inputEmail.value && emailRepeat.touched"
+                      name="email_repeat"
+                      id="email_repeat"
+                      placeholder="mail@email.com"
+                      [(ngModel)]="email_repeat"
+                      required
+                      #emailRepeat="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="emailRepeat.value != inputEmail.value && emailRepeat.touched">Emails do not match</div>
+                    <label for="email_repeat" class="form-label">Repeat email</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [class.is-invalid]="inputUsername.errors && inputUsername.touched"
+                      name="username"
+                      id="username"
+                      placeholder="username"
+                      [(ngModel)]="username"
+                      minlength="6"
+                      required
+                      #inputUsername="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="inputUsername.errors && inputUsername.touched">Minimum of 6 symbols</div>
+                    <label for="username" class="form-label">Username</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="password"
+                      class="form-control"
+                      [class.is-invalid]="!inputPassword.valid && inputPassword.touched"
+                      name="password"
+                      id="password"
+                      value=""
+                      placeholder="Password"
+                      [(ngModel)]="password"
+                      required
+                      minlength="6"
+                      #inputPassword="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="!inputPassword.valid && inputPassword.touched">At least 6 symbols</div>
+                    <label for="password" class="form-label">Password</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="password"
+                      class="form-control"
+                      [class.is-invalid]="passwordRepeat.value != inputPassword.value && passwordRepeat.touched"
+                      name="password_repeat"
+                      id="password_repeat"
+                      value=""
+                      placeholder="Password"
+                      [(ngModel)]="password_repeat"
+                      required
+                      minlength="6"
+                      #passwordRepeat="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="passwordRepeat.value != inputPassword.value && passwordRepeat.touched">Passwords do not match</div>
+                    <label for="password_repeat" class="form-label">Password</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button type="submit" class="btn bsb-btn-xl btn-primary" type="submit" [disabled]="!f.valid">Register</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-12">
+                <hr class="mt-5 mb-4 border-secondary-subtle">
+                <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end">
+                  <a class="link-secondary text-decoration-none" routerLink="/login">Already have an account? Login here</a>
+                </div>
+                <div class="alert alert-danger" *ngIf="isError">
+                  {{ status }} {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

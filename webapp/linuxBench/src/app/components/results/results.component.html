@@ -1,0 +1,74 @@
+<div class="card mt-5">
+  <div class="card-header text-center">{{ title }} Results</div>
+  <div class="card-body">
+    <app-loading *ngIf="isLoading"></app-loading>
+    <div class="alert alert-danger" *ngIf="isError">
+      Status: {{ status }}, message: {{ message }}
+    </div>
+    <table class="table" *ngIf="!isLoading && !isError">
+      <thead>
+      <tr>
+        <th>
+          Benchmark
+        </th>
+        <th>
+          Type
+        </th>
+        <th>
+          Model
+        </th>
+        <th>
+          Frequency
+        </th>
+        <th>
+          Average Score
+        </th>
+        <th>
+          Best Score
+        </th>
+        <th>
+          Username
+        </th>
+        <th style="width: 250px;">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let bench of benches; let i=index">
+        <td>
+          {{ bench.bench_name }}
+        </td>
+        <td>
+          {{ bench.bench_type }}
+        </td>
+        <td>
+          {{ bench.hw_model }}
+        </td>
+        <td>
+          {{ bench.frequency }}
+        </td>
+        <td>
+          {{ bench.average }}
+        </td>
+        <td>
+          {{ bench.fastest }}
+        </td>
+        <td>
+          {{ bench.username }}
+        </td>
+        <td>
+          <a class="btn btn-success me-3" [routerLink]="['/benchmarks', bench.bench_name, bench.id]">Update</a>
+          <button class="btn btn-danger" (click)="deleteResult(bench.id)">Delete</button>
+        </td>
+
+      </tr>
+      </tbody>
+
+    </table>
+
+
+  </div>
+
+</div>
+<app-footer></app-footer>

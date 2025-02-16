@@ -1,0 +1,79 @@
+<section class="bg-light p-3 p-md-4 p-xl-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5">
+        <div class="card border border-light-subtle rounded-4">
+          <div class="card-body p-3 p-md-4 p-xl-5">
+            <div class="row">
+              <div class="col-12">
+                <div class="mb-5">
+                  <div class="text-center mb-4">
+                    <img src="/logo.png" alt="Logo" width="50%"/>
+                  </div>
+                  <h4 class="text-center">Login to your profile</h4>
+                </div>
+              </div>
+            </div>
+            <form (ngSubmit)="login(f)" #f="ngForm">
+              <div class="row gy-3 overflow-hidden">
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="email"
+                      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                      class="form-control"
+                      [class.is-invalid]="inputEmail.errors"
+                      name="email"
+                      id="email"
+                      placeholder="name@example.com"
+                      [(ngModel)]="email"
+                      required
+                      #inputEmail="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="inputEmail.errors && inputEmail.touched">Wrong email format </div>
+                    <label for="email" class="form-label">Email</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input
+                      type="password"
+                      class="form-control"
+                      [class.is-invalid]="!inputPassword.valid && inputPassword.touched"
+                      name="password"
+                      id="password"
+                      value=""
+                      placeholder="Password"
+                      [(ngModel)]="password"
+                      required
+                      minlength="6"
+                      #inputPassword="ngModel"
+                    >
+                    <div class="helper-block" *ngIf="!inputPassword.valid && inputPassword.touched">At least 6 symbols</div>
+                    <label for="password" class="form-label">Password</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button type="submit" class="btn bsb-btn-xl btn-primary" type="submit" [disabled]="!f.valid">Login</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-12">
+                <hr class="mt-5 mb-4 border-secondary-subtle">
+                <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end">
+                  <a class="link-secondary text-decoration-none" routerLink="/register">Don't have a profile yet? Register here</a>
+                </div>
+                <div class="alert alert-danger justify-content-center" *ngIf="isError">
+                  {{ status }} {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
