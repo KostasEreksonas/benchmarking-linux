@@ -13,7 +13,7 @@ export class AuthService {
   public register(action:string, name:string, email:string, password:string) {
     return this.http.post<AuthResponseData>('http://localhost/auth_user.php', {
       action:action,
-      name:name,
+      username:name,
       email:email,
       password:password,
     })

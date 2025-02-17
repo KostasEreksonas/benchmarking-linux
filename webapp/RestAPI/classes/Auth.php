@@ -11,7 +11,7 @@ class Auth {
         /*
          * Create a database and token instances
          */
-        $this->db = new Database("localhost", "root", "", "auth");
+        $this->db = new Database("localhost", "root", "", "results");
         $this->token = new Token();
     }
 
