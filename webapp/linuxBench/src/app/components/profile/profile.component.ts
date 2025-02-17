@@ -5,7 +5,6 @@ import {CommonModule} from '@angular/common';
 import {Bench} from '../../models/bench';
 import {BenchResultsService} from '../../services/bench-results.service';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {FooterComponent} from '../footer/footer.component';
 import {AuthService} from '../../services/auth.service';
 
 @Component({
@@ -16,7 +15,6 @@ import {AuthService} from '../../services/auth.service';
     LoadingComponent,
     CommonModule,
     RouterLink,
-    FooterComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -28,11 +26,17 @@ export class ProfileComponent {
   public benches:Bench[] = [];
   public isLoading:boolean = false;
   public isError:boolean = false;
+  public edit:boolean = false;
+  public token:string|null = '';
   public status:number = 0;
   public message:string = '';
 
   public constructor(private route:ActivatedRoute, private auth:AuthService, private benchService:BenchResultsService) {
     this.username = this.route.snapshot.params["username"];
+    this.token = localStorage.getItem('token');
+    if (this.username === localStorage.getItem('name')) {
+      this.edit = true;
+    }
 
     this.auth.loadData(this.username).subscribe({
       next:(data)=>{

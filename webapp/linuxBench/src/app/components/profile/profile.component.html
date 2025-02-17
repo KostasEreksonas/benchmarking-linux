@@ -57,7 +57,7 @@
                           <th>
                             Best result
                           </th>
-                          <th style="width: 250px;">
+                          <th style="width: 250px;" *ngIf="token && edit">
                             Actions
                           </th>
                         </tr>
@@ -82,7 +82,7 @@
                           <td>
                             {{ bench.fastest }}
                           </td>
-                          <td>
+                          <td *ngIf="token && edit">
                             <a class="btn btn-success me-3" [routerLink]="['/benchmarks', bench.bench_name, bench.id]">Redaguoti</a>
                             <button class="btn btn-danger" (click)="deleteResult(bench.bench_name, bench.id)">Ištrinti</button>
                           </td>

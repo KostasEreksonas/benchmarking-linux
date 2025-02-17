@@ -29,9 +29,6 @@
         <th>
           Username
         </th>
-        <th style="width: 250px;">
-          Actions
-        </th>
       </tr>
       </thead>
       <tbody>
@@ -56,10 +53,6 @@
         </td>
         <td>
           {{ bench.username }}
-        </td>
-        <td>
-          <a class="btn btn-success me-3" [routerLink]="['/benchmarks', bench.bench_name, bench.id]">Update</a>
-          <button class="btn btn-danger" (click)="deleteResult(bench.id)">Delete</button>
         </td>
 
       </tr>
