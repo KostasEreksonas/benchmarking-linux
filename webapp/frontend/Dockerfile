@@ -2,7 +2,7 @@ FROM node:18.20.6-slim as build-env
 LABEL authors="kostas"
 LABEL desc="linuxBench webapp"
 WORKDIR .
-COPY ../../linuxBench .
+COPY linuxBench .
 
 RUN npm install
 RUN npm install -g @angular/cli

@@ -24,22 +24,26 @@ services:
       - frontend
 
   # PHP Backend Services
-  php-app:
-    image: your-php-image:latest
+  RestAPI:
+    build:
+      context: ./backend/RestAPI/
+      dockerfile: Dockerfile
+    environment:
+      - PORT=80
     deploy:
       replicas: 5
     networks:
       - backend
 
   # Nginx Load Balancer for PHP
-  php-lb:
+  RestAPI-lb:
     image: nginx:latest
     volumes:
-      - ./nginx/php.conf:/etc/nginx/nginx.conf
+      - ./backend/nginx/php.conf:/etc/nginx/nginx.conf
     ports:
       - "8080:80"
     depends_on:
-      - php-app
+      - RestAPI
     networks:
       - backend
 
@@ -47,28 +51,16 @@ services:
   mysql-db:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: appdb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: results
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppassword
     deploy:
       replicas: 5
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./db:/var/lib/mysql
     networks:
-      - database
-
-  # MySQL Load Balancer
-  mysql-lb:
-    image: nginx:latest
-    volumes:
-      - ./nginx/mysql.conf:/etc/nginx/nginx.conf
-    ports:
-      - "3306:3306"
-    depends_on:
-      - mysql-db
-    networks:
-      - database
+      - backend
 
   # cAdvisor for Monitoring
   cadvisor:
@@ -98,7 +90,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     networks:
       - monitoring
     depends_on:
@@ -107,7 +99,6 @@ services:
 networks:
   frontend:
   backend:
-  database:
   monitoring:
 
 volumes:
