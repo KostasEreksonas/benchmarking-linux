@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {LoadingComponent} from '../loading/loading.component';
 import {FooterComponent} from '../footer/footer.component';
 import {Bench} from '../../models/bench';
@@ -10,7 +10,6 @@ import {BenchResultsService} from '../../services/bench-results.service';
   selector: 'app-results',
   imports: [
     CommonModule,
-    RouterLink,
     LoadingComponent,
     FooterComponent
   ],
@@ -53,13 +52,5 @@ export class ResultsComponent {
     this.benchmark = this.route.snapshot.params["benchmark"];
     this.title = this.benchmark;
     this.loadData();
-  }
-
-  public deleteResult(id:string|null){
-    if (id != null) {
-      this.benchService.deleteResult(this.benchmark, id).subscribe(()=>{
-        this.loadData();
-      });
-    }
   }
 }

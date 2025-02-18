@@ -1,31 +1,115 @@
 version: '3.8'
+
 services:
-  web:
-    build:
-      context: ./mounts/linuxBench
-      dockerfile: Dockerfile.front
+  # Angular Frontend Services
+  angular-app:
+    image: your-angular-image:latest
+    deploy:
+      replicas: 5
+    ports:
+      - "4200"
+    networks:
+      - frontend
+
+  # Nginx Load Balancer for Angular
+  angular-lb:
+    image: nginx:latest
+    volumes:
+      - ./nginx/angular.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     depends_on:
-      - db
+      - angular-app
+    networks:
+      - frontend
+
+  # PHP Backend Services
+  php-app:
+    image: your-php-image:latest
+    deploy:
+      replicas: 5
+    networks:
+      - backend
+
+  # Nginx Load Balancer for PHP
+  php-lb:
+    image: nginx:latest
     volumes:
-      - ./linuxBench:/var/www/html
-  back:
-    build:
-      context: ./mounts/RestAPI
-      dockerfile: Dockerfile.back
+      - ./nginx/php.conf:/etc/nginx/nginx.conf
     ports:
-      - "81:81"
+      - "8080:80"
     depends_on:
-      - db
-    volumes:
-      - ./RestAPI:/var/www/html
-  db:
-    image: mysql:9
+      - php-app
+    networks:
+      - backend
+
+  # MySQL Database Services
+  mysql-db:
+    image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: benchmark_ffmpeg
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    deploy:
+      replicas: 5
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - database
+
+  # MySQL Load Balancer
+  mysql-lb:
+    image: nginx:latest
+    volumes:
+      - ./nginx/mysql.conf:/etc/nginx/nginx.conf
     ports:
       - "3306:3306"
+    depends_on:
+      - mysql-db
+    networks:
+      - database
+
+  # cAdvisor for Monitoring
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "8081:8080"
     volumes:
-      - ./mounts/mysql_data:/var/lib/mysql
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /sys:/sys
+      - /var/lib/docker/:/var/lib/docker
+    networks:
+      - monitoring
+
+  # Prometheus for Data Collection
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  # Grafana for Data Visualization
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+networks:
+  frontend:
+  backend:
+  database:
+  monitoring:
+
+volumes:
+  mysql-data:
+  grafana-data:

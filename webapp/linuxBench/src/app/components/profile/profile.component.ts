@@ -49,7 +49,7 @@ export class ProfileComponent {
       }
     })
 
-    let benchmarks = ["ffmpeg", "povray"];
+    let benchmarks = ["ffmpeg"];
     for (let b in benchmarks) {
       this.benchService.userResults(benchmarks[b], this.username).subscribe({
         next:(data)=>{

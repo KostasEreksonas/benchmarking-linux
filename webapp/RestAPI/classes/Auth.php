@@ -76,7 +76,7 @@ class Auth {
             http_response_code($code);
             $result = $this->showStatus($code, "Method $method not allowed", "");
         } else {
-            $sql = "SELECT id,email,username,password,created_at FROM `users` WHERE `email` = '$email'";
+            $sql = "SELECT user_id,email,username,password,created_at FROM `users` WHERE `email` = '$email'";
             $this->db->query($sql);
             $data = $this->db->single();
             $data = json_decode(json_encode($data), true);
