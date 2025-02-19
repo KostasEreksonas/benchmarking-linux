@@ -3,11 +3,11 @@ version: '3.8'
 services:
   # Angular Frontend Services
   angular-app:
-    image: your-angular-image:latest
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
     deploy:
       replicas: 5
-    ports:
-      - "4200"
     networks:
       - frontend
 
@@ -15,18 +15,18 @@ services:
   angular-lb:
     image: nginx:latest
     volumes:
-      - ./nginx/angular.conf:/etc/nginx/nginx.conf
+      - ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "80:80"
+      - "80:4200"
     depends_on:
       - angular-app
     networks:
       - frontend
 
   # PHP Backend Services
-  RestAPI:
+  php-api:
     build:
-      context: ./backend/RestAPI/
+      context: ./backend/
       dockerfile: Dockerfile
     environment:
       - PORT=80
@@ -36,14 +36,14 @@ services:
       - backend
 
   # Nginx Load Balancer for PHP
-  RestAPI-lb:
+  php-api-lb:
     image: nginx:latest
     volumes:
-      - ./backend/nginx/php.conf:/etc/nginx/nginx.conf
+      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "8080:80"
     depends_on:
-      - RestAPI
+      - php-api
     networks:
       - backend
 
@@ -55,8 +55,6 @@ services:
       MYSQL_DATABASE: results
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppassword
-    deploy:
-      replicas: 5
     volumes:
       - ./db:/var/lib/mysql
     networks:
