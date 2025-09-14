@@ -4,7 +4,7 @@ LABEL desc="linuxBench webapp"
 WORKDIR linuxBench/
 COPY ./linuxBench/ .
 
-#EXPOSE 4200
+EXPOSE 4200
 
 RUN npm install -g @angular/cli
 RUN npm install
